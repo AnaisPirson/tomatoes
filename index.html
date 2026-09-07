@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Rotten Polls! 🍅</title>
+  <!-- Free Confetti Library -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
   <style>
     * { box-sizing: border-box; font-family: 'Georgia', serif; }
     body { background-color: #dcddc0; color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; }
@@ -47,6 +50,12 @@
       border-radius: 8px; 
       box-shadow: 0 8px 20px rgba(0,0,0,0.6);
     }
+    #arena-val {
+  font-size: 2.2rem;
+  line-height: 0.75;
+  display: block; /* Forces flag to sit underneath the label */
+  margin-top: 4px;
+}
 
     /* BIGGER CELLS WITH DYNAMIC SCALING */
     .cell { 
@@ -63,7 +72,7 @@
     .cell:active { transform: scale(0.92); }
     .cell.miss { background: #747d8c; }
     .cell.miss::after { content: '🫟'; line-height: 0; }
-    .cell.hit { background: #ff4757; }
+    .cell.hit { background: #f498a0; }
     .cell.hit::after { content: '🍅'; line-height: 0; }
     .cell.sunk { background: #2ed573; }
 
@@ -71,16 +80,53 @@
 
     /* ================= NEWSPAPER END SCREEN ================= */
 .newspaper {
-  background: #f4f1ea; /* Off-white newsprint paper */
-  color: #111; /* Dark print ink */
-  padding: 18px;
-  border: 2px solid #111;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  background: #f2ebd9; /* Aged newsprint paper color */
+  
+  /* Horizontal Center Fold Crease & Lighting Effect */
+  background-image: linear-gradient(
+    to bottom, 
+    rgba(255,255,255,0.2) 0%, 
+    rgba(0,0,0,0) 46%, 
+    rgba(0,0,0,0.18) 50%, /* Center Fold Shadow */
+    rgba(255,255,255,0.25) 53%, /* Center Fold Highlight */
+    rgba(0,0,0,0) 60%
+  );
+  
+  color: #111;
+  padding: 22px 18px;
+  border: 1px solid #d4c8ad;
+  
+  /* Stacked Multi-Page Layer Shadows */
+  box-shadow: 
+    0 1px 1px rgba(0,0,0,0.15), 
+    0 5px 0 -2px #e6dec5, /* 2nd page layer below */
+    0 5px 1px -1px rgba(0,0,0,0.2), 
+    0 10px 0 -4px #d8cea8, /* 3rd page layer below */
+    0 10px 2px -3px rgba(0,0,0,0.3),
+    0 20px 35px rgba(0,0,0,0.85); /* Deep tabletop shadow */
+    
   font-family: 'Times New Roman', Times, serif;
   width: 100%;
-  max-width: 480px;
+  max-width: 460px;
   text-align: center;
+  position: relative;
+  
+  /* Subtle realistic physical tilt */
+  transform: rotate(-0.8deg);
 }
+
+/* Dog-eared Folded Corner (Bottom Right) */
+.newspaper::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  border-width: 0 0 22px 22px;
+  border-style: solid;
+  border-color: transparent transparent #121212 #c5b896; /* Dark background + underside of paper */
+  box-shadow: -2px -2px 4px rgba(0,0,0,0.3);
+}
+
 
 .newspaper-masthead {
   font-size: 2.1rem;
@@ -143,6 +189,57 @@
   color: #222;
 }
 
+@keyframes tomatoSplat {
+  0% {
+    transform: scale(0.3) rotate(0deg);
+    opacity: 0.2;
+  }
+  50% {
+    transform: scale(1.8) rotate(15deg); /* Pops big */
+    opacity: 1;
+  }
+  70% {
+    transform: scale(0.9) rotate(-10deg); /* Squishes back */
+  }
+  100% {
+    transform: scale(1) rotate(0deg); /* Settles */
+  }
+}
+
+/* Apply animation to Hit and Miss emojis */
+.cell.hit::after,
+.cell.miss::after {
+  content: ''; 
+  display: block;
+  width: 85%;
+  height: 85%;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  animation: tomatoSplat 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.cell.miss::after {
+  background-image: url('src/blood-splatter-icon.png');
+}
+
+/* 🍅 HIT IMAGE */
+.cell.hit::after {
+  background-image: url('src/rotten-tomato.png');
+}
+@keyframes stageShake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  20% { transform: translate(-3px, 0px) rotate(-1deg); }
+  40% { transform: translate(3px, 2px) rotate(1deg); }
+  60% { transform: translate(-3px, 1px) rotate(0deg); }
+  80% { transform: translate(3px, 1px) rotate(1deg); }
+  100% { transform: translate(0px, 0px) rotate(0deg); }
+}
+
+.shake {
+  animation: stageShake 0.4s ease-in-out;
+}
+
   </style>
 </head>
 <body>
@@ -156,7 +253,7 @@
       <div class="scroll-body">
         <div class="scroll-border">
           <h1 class="scroll-title">Rotten Polls! 🍅</h1>
-          <div class="scroll-subtitle">~ Official Royal Decree ~<br>"Democracy is messy. Bring extra sauce."</div>
+          <div class="scroll-subtitle">~ Executive Order ~<br>"Hold them accountable. Throw produce."</div>
           
           <p style="font-size: 0.85rem; line-height: 1.4; color: #3a2511; margin-bottom: 15px;">
             <strong>Proclamation:</strong> 5 politicians are on stage. You have <strong>35 Rotten Tomatoes</strong> to oust them all and prevent them from taking over!
@@ -168,7 +265,7 @@
             <button class="btn country-btn selected" onclick="selectCountry('US')"><span>🇺🇸</span> USA</button>
             <button class="btn country-btn" onclick="selectCountry('UK')"><span>🇬🇧</span> UK</button>
             <button class="btn country-btn" onclick="selectCountry('NL')"><span>🇳🇱</span> NL</button>
-            <button class="btn country-btn" onclick="selectCountry('FR')"><span>🇫🇷</span> France</button>
+            <button class="btn country-btn" onclick="selectCountry('FR')"><span>🇫🇷</span> FR</button>
           </div>
 
           <button class="btn" style="background: #2e7d32; font-size: 1.1rem; width: 100%;" onclick="startGame()">START CAMPAIGN</button>
@@ -344,8 +441,15 @@ let totalHits = 0;
           pol.sunk = true;
           standingCount--;
           document.getElementById('standing-val').innerText = `${standingCount}/${activePoliticians.length}`;
-          document.getElementById('quote-box').innerText = `💥 RESIGNATION! You forced ${pol.name} to resign!`;
+          document.getElementById('quote-box').innerText = `RESIGNATION! You forced ${pol.name} to resign!`;
           markSunkCells(pol.id);
+                    // 💥 TRIGGER SCREEN SHAKE HERE:
+          const gridEl = document.getElementById('grid');
+          gridEl.classList.remove('shake'); // 1. Reset class
+          void gridEl.offsetWidth;          // 2. DOM reflow trick (forces animation to re-trigger)
+          gridEl.classList.add('shake');    // 3. Add shake class
+    
+
         } else {
           document.getElementById('quote-box').innerText = `DIRECT HIT! ${pol.name}: "${pol.quote}"`;
         }
@@ -421,6 +525,10 @@ let totalHits = 0;
       tagEl.style.background = "#2e7d32";
       titleEl.innerText = "LANDSLIDE VICTORY!";
       subEl.innerText = config.headlineWin;
+
+      // 🎊 TRIGGER CONFETTI BURST!
+           launchVictoryConfetti();
+
     } else {
       tagEl.innerText = "ELECTION DISASTER!";
       tagEl.style.background = "#b22222";
@@ -436,37 +544,71 @@ let totalHits = 0;
   }, 500);
 }
 
+function launchVictoryConfetti() {
+  const duration = 3 * 1000; // 3 Seconds (change to 5 * 1000 for 5 seconds)
+  const end = Date.now() + duration;
+  const colors = ['#ff4757', '#2ed573', '#eccc68', '#ffffff'];
+
+  (function frame() {
+    // Left Cannon
+    confetti({
+      particleCount: 4,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0, y: 0.7 },
+      colors: colors
+    });
+
+    // Right Cannon
+    confetti({
+      particleCount: 4,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1, y: 0.7 },
+      colors: colors
+    });
+
+    // Keep firing until 3 seconds has passed
+    if (Date.now() < end) {
+      requestAnimationFrame(frame);
+    }
+  }());
+}
+
+
 
     // ==========================================
 // DEV TESTING HELPERS (For testing End Screens)
 // ==========================================
 
 // Force a Victory Screen
-// function testWin(remainingTomatoes = 15) {
-//   ammo = remainingTomatoes;
-//   standingCount = 0;
-//   endGame(true);
-// }
+function testWin(remainingTomatoes = 15) {
+  ammo = remainingTomatoes;
+  standingCount = 0;
+  endGame(true);
+}
 
-// // Force a Loss Screen
-// function testLoss() {
-//   ammo = 0;
-//   standingCount = 2;
-//   endGame(false);
-// }
+// Force a Loss Screen
+function testLoss() {
+  ammo = 0;
+  standingCount = 2;
+  endGame(false);
+}
 
-// // Secret Keyboard Shortcuts for Dev Testing:
-// // Press 'W' on your keyboard for Win, 'L' for Loss
-// document.addEventListener('keydown', (e) => {
-//   if (e.key === 'w' || e.key === 'W') {
-//     console.log("Dev Test: Forcing Win Screen...");
-//     testWin(12); // Test with 12 tomatoes left
-//   }
-//   if (e.key === 'l' || e.key === 'L') {
-//     console.log("Dev Test: Forcing Loss Screen...");
-//     testLoss();
-//   }
-// });
+// Secret Keyboard Shortcuts for Dev Testing:
+// Press 'W' on your keyboard for Win, 'L' for Loss
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'w' || e.key === 'W') {
+    console.log("Dev Test: Forcing Win Screen...");
+    testWin(12); // Test with 12 tomatoes left
+  }
+  if (e.key === 'l' || e.key === 'L') {
+    console.log("Dev Test: Forcing Loss Screen...");
+    testLoss();
+  }
+});
+
+
   </script>
 </body>
 </html>
