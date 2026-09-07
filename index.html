@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Rotten Polls! 🍅</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Georgia', serif; }
+    body { background-color: #dcddc0; color: #fff; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; }
+    
+    .screen { display: none; width: 100%; max-width: 450px; flex-direction: column; align-items: center; }
+    
+    /* Bigger Game Screen Container */
+    #game-screen { max-width: min(96vw, 550px); }
+    .active { display: flex; }
+
+    /* ================= SCROLL STYLING ================= */
+    .scroll-wrapper { width: 100%; position: relative; margin: 10px 0; }
+    .scroll-rod { height: 22px; width: 106%; margin-left: -3%; background: linear-gradient(to right, #4a2c11, #8b5a2b, #d4a373, #8b5a2b, #4a2c11); border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.6); position: relative; z-index: 3; }
+    .scroll-body { background: linear-gradient(to bottom, #f4e4bc 0%, #e6d3a7 50%, #d8c292 100%); color: #2b1d0c; padding: 25px 20px; border-left: 4px solid #b89b5e; border-right: 4px solid #b89b5e; box-shadow: inset 0 0 30px rgba(139, 69, 19, 0.35), 0 10px 25px rgba(0,0,0,0.7); position: relative; z-index: 2; }
+    .scroll-border { border: 2px dashed #8b5a2b; padding: 15px 12px; border-radius: 4px; }
+    .scroll-title { font-size: 2.2rem; margin: 0; color: #8b0000; text-transform: uppercase; letter-spacing: 2px; text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5); }
+    .scroll-subtitle { font-style: italic; font-size: 0.95rem; color: #5c3a21; margin-bottom: 15px; }
+
+    .country-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+    .btn { background: #8b0000; color: #f4e4bc; border: 1px solid #5c0000; padding: 12px 15px; font-size: 1rem; font-weight: bold; border-radius: 6px; cursor: pointer; margin: 0; width: 100%; transition: transform 0.1s, background 0.2s; font-family: 'Segoe UI', sans-serif; }
+    .btn:active { transform: scale(0.96); }
+    .country-btn { background: #e0cca0; color: #2b1d0c; border: 1px solid #8b5a2b; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: bold; font-size: 0.95rem; }
+    .country-btn.selected { background: #2e7d32; color: #fff; border-color: #1b5e20; }
+
+    /* ================= GAMEPLAY STYLING (MAXIMIZED GRID) ================= */
+    .hud { display: flex; justify-content: space-between; width: 100%; margin-bottom: 10px; background: #2f3542; padding: 10px 15px; border-radius: 8px; font-family: sans-serif; }
+    .hud-box { text-align: center; font-size: 0.85rem; }
+    .hud-val { font-size: 1.4rem; font-weight: bold; color: #ff4757; }
+
+    .quote-box { background: #7b4141; width: 100%; padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; font-style: italic; color: #eccc68; display: flex; align-items: center; justify-content: center; font-size: 0.95rem; border: 1px solid #444; }
+
+    /* MAXIMIZED 10x10 GRID */
+    .grid { 
+      display: grid; 
+      grid-template-columns: repeat(10, 1fr); 
+      gap: 3px; /* Reduced gap to make cells bigger */
+      width: 100%; 
+      aspect-ratio: 1; /* Keeps grid perfectly square */
+      background: #2f3542; 
+      padding: 5px; 
+      border-radius: 8px; 
+      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+    }
+
+    /* BIGGER CELLS WITH DYNAMIC SCALING */
+    .cell { 
+      background: #57606f; 
+      border-radius: 4px; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: clamp(1.1rem, 5vw, 1.8rem); /* Dynamically scales emojis */
+      user-select: none; 
+      transition: background 0.15s;
+    }
+    .cell:active { transform: scale(0.92); }
+    .cell.miss { background: #747d8c; }
+    .cell.miss::after { content: '🫟'; line-height: 0; }
+    .cell.hit { background: #ff4757; }
+    .cell.hit::after { content: '🍅'; line-height: 0; }
+    .cell.sunk { background: #2ed573; }
+
+    footer { margin-top: 15px; font-size: 0.75rem; color: #920e0e; max-width: 400px; font-family: sans-serif; }
+  </style>
+</head>
+<body>
+
+  <!-- 1. WELCOME SCREEN (PARCHMENT SCROLL DESIGN) -->
+  <div id="welcome-screen" class="screen active">
+    
+    <div class="scroll-wrapper">
+      <div class="scroll-rod"></div>
+      
+      <div class="scroll-body">
+        <div class="scroll-border">
+          <h1 class="scroll-title">Rotten Polls! 🍅</h1>
+          <div class="scroll-subtitle">~ Official Royal Decree ~<br>"Democracy is messy. Bring extra sauce."</div>
+          
+          <p style="font-size: 0.85rem; line-height: 1.4; color: #3a2511; margin-bottom: 15px;">
+            <strong>Proclamation:</strong> 5 politicians are on stage. You have <strong>35 Rotten Tomatoes</strong> to oust them all and prevent them from taking over!
+          </p>
+
+          <div style="font-weight: bold; margin-bottom: 10px; font-size: 0.9rem; text-transform: uppercase;">Select Your Area:</div>
+          
+          <div class="country-grid">
+            <button class="btn country-btn selected" onclick="selectCountry('US')"><span>🇺🇸</span> USA</button>
+            <button class="btn country-btn" onclick="selectCountry('UK')"><span>🇬🇧</span> UK</button>
+            <button class="btn country-btn" onclick="selectCountry('NL')"><span>🇳🇱</span> NL</button>
+            <button class="btn country-btn" onclick="selectCountry('FR')"><span>🇫🇷</span> France</button>
+          </div>
+
+          <button class="btn" style="background: #2e7d32; font-size: 1.1rem; width: 100%;" onclick="startGame()">START CAMPAIGN</button>
+        </div>
+      </div>
+
+      <div class="scroll-rod"></div>
+    </div>
+
+  </div>
+
+  <!-- 2. GAMEPLAY SCREEN -->
+  <div id="game-screen" class="screen">
+    <div class="hud">
+      <div class="hud-box">Tomatoes: <div id="ammo-val" class="hud-val">35</div></div>
+      <div class="hud-box">Location: <div id="arena-val" class="hud-val">🇺🇸</div></div>
+      <div class="hud-box">Standing: <div id="standing-val" class="hud-val">5/5</div></div>
+    </div>
+
+    <div id="quote-box" class="quote-box">Throw a tomato at the debate stage!</div>
+
+    <div id="grid" class="grid"></div>
+  </div>
+
+  <!-- 3. END SCREEN -->
+  <div id="end-screen" class="screen">
+    <h1 id="end-title" style="color: #ff4757; font-family: sans-serif;">VICTORY!</h1>
+    <p id="end-sub">You ousted every single politician!</p>
+    <div class="hud" style="flex-direction: column; gap: 10px;">
+      <div>Tomatoes Left: <span id="end-tomatoes" style="color:#ff4757; font-weight:bold;">0</span></div>
+      <div>Result Headline: <div id="end-headline" style="color:#eccc68; margin-top:5px; font-style:italic;"></div></div>
+    </div>
+    <button class="btn" style="background: #2ed573;" onclick="showWelcome()">PLAY AGAIN</button>
+  </div>
+
+  <footer>
+    <p><strong> Disclaimer:</strong>  This game is a work of political satire and parody and does not aim to promote real-world violence or political hostility. No tomatoes were harmed in the making of this game. Please keep your real-world tomatoes in your salad, not at your local government officials!</p>
+  </footer>
+
+  <script>
+    const countryConfigs = {
+      US: { flag: "🇺🇸", headlineWin: "Local Farmer's Market dissolves Congress!", headlineLoss: "Congress survives debate and raises tomato taxes.", politicians: [{ name: "The President", size: 5, quote: "I plead the Fifth!" }, { name: "The Senator", size: 4, quote: "I filibuster this tomato!" }, { name: "The Mayor", size: 3, quote: "Think of my voters!" }, { name: "The Lobbyist", size: 3, quote: "My donors will hear about this!" }, { name: "The Intern", size: 2, quote: "I just got the coffee..." }] },
+      UK: { flag: "🇬🇧", headlineWin: "Speaker declares a national tomato shortage!", headlineLoss: "MPs order raincoats for the next debate.", politicians: [{ name: "Prime Minister", size: 5, quote: "ORDER! ORDER!" }, { name: "Cabinet MP", size: 4, quote: "Absolute poppycock!" }, { name: "Lords Peer", size: 3, quote: "I was sleeping!" }, { name: "Local Councillor", size: 3, quote: "NIMBY!" }, { name: "The SpAd", size: 2, quote: "Leaking to the press..." }] },
+      NL: { flag: "🇳🇱", headlineWin: "Minister-President flees on bicycle!", headlineLoss: "Politicians report no active memory of tomato hits.", politicians: [{ name: "Minister-President", size: 5, quote: "Geen actieve herinnering!" }, { name: "Fractievoorzitter", size: 4, quote: "Motie van wantrouwen!" }, { name: "Wethouder", size: 3, quote: "Geen budget meer!" }, { name: "Lobbyist", size: 3, quote: "Koffietijd in Den Haag!" }, { name: "Beleidsmedewerker", size: 2, quote: "Ik schrijf alleen de nota's!" }] },
+      FR: { flag: "🇫🇷", headlineWin: "The Assembly surrenders to the produce aisle!", headlineLoss: "Surviving MPs use Article 49.3 to ban tomatoes.", politicians: [{ name: "Le Président", size: 5, quote: "C'est de la poudre de perlimpinpin !" }, { name: "Premier Ministre", size: 4, quote: "J'utilise l'Article 49.3 !" }, { name: "Le Député", size: 3, quote: "Je demande un temps de parole !" }, { name: "Le Maire", size: 3, quote: "Inadmissible !" }, { name: "L'Attaché", size: 2, quote: "Grève générale !" }] }
+    };
+
+    let currentCountry = 'US';
+    let ammo = 35;
+    let gridData = [];
+    let activePoliticians = [];
+    let standingCount = 5;
+
+    function selectCountry(code) {
+      currentCountry = code;
+      document.querySelectorAll('.country-btn').forEach(btn => btn.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+    }
+
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function showWelcome() { showScreen('welcome-screen'); }
+
+    function startGame() {
+      ammo = 35;
+      gridData = Array(10).fill(null).map(() => Array(10).fill(null));
+      const config = countryConfigs[currentCountry];
+      activePoliticians = config.politicians.map((p, idx) => ({ ...p, id: idx, hits: 0, sunk: false }));
+      standingCount = activePoliticians.length;
+
+      document.getElementById('arena-val').innerText = config.flag;
+      document.getElementById('ammo-val').innerText = ammo;
+      document.getElementById('standing-val').innerText = `${standingCount}/${activePoliticians.length}`;
+      document.getElementById('quote-box').innerText = "Throw a tomato at the debate stage!";
+
+      placePoliticians();
+      renderGrid();
+      showScreen('game-screen');
+    }
+
+    function placePoliticians() {
+      activePoliticians.forEach(pol => {
+        let placed = false;
+        while (!placed) {
+          let isVert = Math.random() < 0.5;
+          let r = Math.floor(Math.random() * (isVert ? 10 - pol.size + 1 : 10));
+          let c = Math.floor(Math.random() * (isVert ? 10 : 10 - pol.size + 1));
+          
+          let canPlace = true;
+          for (let i = 0; i < pol.size; i++) {
+            if (gridData[isVert ? r + i : r][isVert ? c : c + i] !== null) { canPlace = false; break; }
+          }
+
+          if (canPlace) {
+            for (let i = 0; i < pol.size; i++) {
+              gridData[isVert ? r + i : r][isVert ? c : c + i] = { id: pol.id, hit: false };
+            }
+            placed = true;
+          }
+        }
+      });
+    }
+
+    function renderGrid() {
+      const gridEl = document.getElementById('grid');
+      gridEl.innerHTML = '';
+      for (let r = 0; r < 10; r++) {
+        for (let c = 0; c < 10; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.dataset.r = r;
+          cell.dataset.c = c;
+          cell.onclick = () => handleCellClick(r, c, cell);
+          gridEl.appendChild(cell);
+        }
+      }
+    }
+
+    function handleCellClick(r, c, cellEl) {
+      if (cellEl.classList.contains('hit') || cellEl.classList.contains('miss') || ammo <= 0) return;
+
+      ammo--;
+      document.getElementById('ammo-val').innerText = ammo;
+
+      const cellData = gridData[r][c];
+      if (cellData !== null) {
+        cellData.hit = true;
+        cellEl.classList.add('hit');
+        const pol = activePoliticians.find(p => p.id === cellData.id);
+        pol.hits++;
+
+        if (pol.hits >= pol.size) {
+          pol.sunk = true;
+          standingCount--;
+          document.getElementById('standing-val').innerText = `${standingCount}/${activePoliticians.length}`;
+          document.getElementById('quote-box').innerText = `💥 RESIGNATION! You forced ${pol.name} to resign!`;
+          markSunkCells(pol.id);
+        } else {
+          document.getElementById('quote-box').innerText = `DIRECT HIT! ${pol.name}: "${pol.quote}"`;
+        }
+      } else {
+        cellEl.classList.add('miss');
+        document.getElementById('quote-box').innerText = "SPLATT! Tomato missed and hit the podium!";
+      }
+
+      checkGameEnd();
+    }
+
+    function markSunkCells(polId) {
+      for (let r = 0; r < 10; r++) {
+        for (let c = 0; c < 10; c++) {
+          if (gridData[r][c] && gridData[r][c].id === polId) {
+            const idx = r * 10 + c;
+            document.getElementById('grid').children[idx].classList.add('sunk');
+          }
+        }
+      }
+    }
+
+    function checkGameEnd() {
+      if (standingCount === 0) {
+        endGame(true);
+      } else if (ammo === 0) {
+        endGame(false);
+      }
+    }
+
+    function endGame(isWin) {
+      setTimeout(() => {
+        const config = countryConfigs[currentCountry];
+        showScreen('end-screen');
+        if (isWin) {
+          document.getElementById('end-title').innerText = "🏆 LANDSLIDE VICTORY!";
+          document.getElementById('end-sub').innerText = "You ousted every single politician on stage!";
+          document.getElementById('end-headline').innerText = config.headlineWin;
+        } else {
+          document.getElementById('end-title').innerText = "❌ CAMPAIGN OVER!";
+          document.getElementById('end-sub').innerText = "You ran out of produce! The politicians survived.";
+          document.getElementById('end-headline').innerText = config.headlineLoss;
+        }
+        document.getElementById('end-tomatoes').innerText = ammo;
+      }, 500);
+    }
+  </script>
+</body>
+</html>
