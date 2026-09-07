@@ -442,31 +442,31 @@ let totalHits = 0;
 // ==========================================
 
 // Force a Victory Screen
-function testWin(remainingTomatoes = 15) {
-  ammo = remainingTomatoes;
-  standingCount = 0;
-  endGame(true);
-}
+// function testWin(remainingTomatoes = 15) {
+//   ammo = remainingTomatoes;
+//   standingCount = 0;
+//   endGame(true);
+// }
 
-// Force a Loss Screen
-function testLoss() {
-  ammo = 0;
-  standingCount = 2;
-  endGame(false);
-}
+// // Force a Loss Screen
+// function testLoss() {
+//   ammo = 0;
+//   standingCount = 2;
+//   endGame(false);
+// }
 
-// Secret Keyboard Shortcuts for Dev Testing:
-// Press 'W' on your keyboard for Win, 'L' for Loss
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'w' || e.key === 'W') {
-    console.log("Dev Test: Forcing Win Screen...");
-    testWin(12); // Test with 12 tomatoes left
-  }
-  if (e.key === 'l' || e.key === 'L') {
-    console.log("Dev Test: Forcing Loss Screen...");
-    testLoss();
-  }
-});
+// // Secret Keyboard Shortcuts for Dev Testing:
+// // Press 'W' on your keyboard for Win, 'L' for Loss
+// document.addEventListener('keydown', (e) => {
+//   if (e.key === 'w' || e.key === 'W') {
+//     console.log("Dev Test: Forcing Win Screen...");
+//     testWin(12); // Test with 12 tomatoes left
+//   }
+//   if (e.key === 'l' || e.key === 'L') {
+//     console.log("Dev Test: Forcing Loss Screen...");
+//     testLoss();
+//   }
+// });
   </script>
 </body>
 </html>
