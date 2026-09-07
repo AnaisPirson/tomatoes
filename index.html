@@ -68,6 +68,81 @@
     .cell.sunk { background: #2ed573; }
 
     footer { margin-top: 15px; font-size: 0.75rem; color: #920e0e; max-width: 400px; font-family: sans-serif; }
+
+    /* ================= NEWSPAPER END SCREEN ================= */
+.newspaper {
+  background: #f4f1ea; /* Off-white newsprint paper */
+  color: #111; /* Dark print ink */
+  padding: 18px;
+  border: 2px solid #111;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+  font-family: 'Times New Roman', Times, serif;
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+}
+
+.newspaper-masthead {
+  font-size: 2.1rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+  border-bottom: 3px double #111;
+  margin-bottom: 4px;
+}
+
+.newspaper-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border-bottom: 1px solid #111;
+  padding-bottom: 4px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  font-family: sans-serif;
+}
+
+.newspaper-edition {
+  background: #111;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 3px 8px;
+  display: inline-block;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+
+.newspaper-headline {
+  font-size: 1.8rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 1.1;
+  margin: 5px 0 10px 0;
+  color: #111;
+}
+
+.newspaper-sub {
+  font-size: 1rem;
+  font-style: italic;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+  color: #333;
+}
+
+.newspaper-stats {
+  background: #e5e1d8;
+  border: 1px dashed #444;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-family: sans-serif;
+  font-size: 0.9rem;
+  color: #222;
+}
+
   </style>
 </head>
 <body>
@@ -119,7 +194,7 @@
   </div>
 
   <!-- 3. END SCREEN -->
-  <div id="end-screen" class="screen">
+  <!-- <div id="end-screen" class="screen">
     <h1 id="end-title" style="color: #ff4757; font-family: sans-serif;">VICTORY!</h1>
     <p id="end-sub">You ousted every single politician!</p>
     <div class="hud" style="flex-direction: column; gap: 10px;">
@@ -127,6 +202,36 @@
       <div>Result Headline: <div id="end-headline" style="color:#eccc68; margin-top:5px; font-style:italic;"></div></div>
     </div>
     <button class="btn" style="background: #2ed573;" onclick="showWelcome()">PLAY AGAIN</button>
+  </div> -->
+
+<!-- 3. END SCREEN (THE DAILY SPLAT NEWSPAPER) -->
+  <div id="end-screen" class="screen">
+    <div class="newspaper">
+      <div class="newspaper-masthead">THE DAILY SPLAT</div>
+      <div class="newspaper-meta">
+        <span>VOL. CXXIV NO. 42</span>
+        <span>FINAL EDITION</span>
+        <span>PRICE: 1 TOMATO</span>
+      </div>
+      
+      <div id="news-edition-tag" class="newspaper-edition">EXTRA! EXTRA!</div>
+      <h1 id="end-title" class="newspaper-headline">PARLIAMENT OUSTED!</h1>
+      <div id="end-headline" class="newspaper-sub">All politicians forced into retirement by tomato onslaught.</div>
+      
+           <div class="newspaper-stats">
+        <div style="font-weight: bold; border-bottom: 1px solid #aaa; padding-bottom: 4px; margin-bottom: 8px; font-size: 0.8rem; text-transform: uppercase;">
+          OFFICIAL ELECTION RESULT DISPATCH
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; text-align: left; font-size: 0.85rem;">
+          <div>👔 Ousted: <strong id="end-ousted">0/5</strong></div>
+          <div>Accuracy: <strong id="end-accuracy">0%</strong></div>
+          <div>🍅 Used: <strong id="end-used">0/35</strong></div>
+          <div>Rating: <strong id="end-stars">⭐⭐⭐</strong></div>
+        </div>
+      </div>
+      <button class="btn" style="background: #111; color: #f4f1ea; border: none; font-family: sans-serif;" onclick="showWelcome()">NEXT ELECTION</button>
+    </div>
   </div>
 
   <footer>
@@ -134,6 +239,8 @@
   </footer>
 
   <script>
+    let totalShots = 0;
+let totalHits = 0;
     const countryConfigs = {
       US: { flag: "🇺🇸", headlineWin: "Local Farmer's Market dissolves Congress!", headlineLoss: "Congress survives debate and raises tomato taxes.", politicians: [{ name: "The President", size: 5, quote: "I plead the Fifth!" }, { name: "The Senator", size: 4, quote: "I filibuster this tomato!" }, { name: "The Mayor", size: 3, quote: "Think of my voters!" }, { name: "The Lobbyist", size: 3, quote: "My donors will hear about this!" }, { name: "The Intern", size: 2, quote: "I just got the coffee..." }] },
       UK: { flag: "🇬🇧", headlineWin: "Speaker declares a national tomato shortage!", headlineLoss: "MPs order raincoats for the next debate.", politicians: [{ name: "Prime Minister", size: 5, quote: "ORDER! ORDER!" }, { name: "Cabinet MP", size: 4, quote: "Absolute poppycock!" }, { name: "Lords Peer", size: 3, quote: "I was sleeping!" }, { name: "Local Councillor", size: 3, quote: "NIMBY!" }, { name: "The SpAd", size: 2, quote: "Leaking to the press..." }] },
@@ -162,6 +269,8 @@
 
     function startGame() {
       ammo = 35;
+    totalShots = 0; // RESET STATS
+  totalHits = 0;  // RESET STATS
       gridData = Array(10).fill(null).map(() => Array(10).fill(null));
       const config = countryConfigs[currentCountry];
       activePoliticians = config.politicians.map((p, idx) => ({ ...p, id: idx, hits: 0, sunk: false }));
@@ -219,10 +328,13 @@
       if (cellEl.classList.contains('hit') || cellEl.classList.contains('miss') || ammo <= 0) return;
 
       ammo--;
+        totalShots++; // TRACK TOTAL SHOTS
+
       document.getElementById('ammo-val').innerText = ammo;
 
       const cellData = gridData[r][c];
       if (cellData !== null) {
+            totalHits++; // TRACK HITS
         cellData.hit = true;
         cellEl.classList.add('hit');
         const pol = activePoliticians.find(p => p.id === cellData.id);
@@ -264,22 +376,97 @@
       }
     }
 
-    function endGame(isWin) {
-      setTimeout(() => {
-        const config = countryConfigs[currentCountry];
-        showScreen('end-screen');
-        if (isWin) {
-          document.getElementById('end-title').innerText = "🏆 LANDSLIDE VICTORY!";
-          document.getElementById('end-sub').innerText = "You ousted every single politician on stage!";
-          document.getElementById('end-headline').innerText = config.headlineWin;
-        } else {
-          document.getElementById('end-title').innerText = "❌ CAMPAIGN OVER!";
-          document.getElementById('end-sub').innerText = "You ran out of produce! The politicians survived.";
-          document.getElementById('end-headline').innerText = config.headlineLoss;
-        }
-        document.getElementById('end-tomatoes').innerText = ammo;
-      }, 500);
+    // function endGame(isWin) {
+    //   setTimeout(() => {
+    //     const config = countryConfigs[currentCountry];
+    //     showScreen('end-screen');
+    //     if (isWin) {
+    //       document.getElementById('end-title').innerText = "🏆 LANDSLIDE VICTORY!";
+    //       document.getElementById('end-sub').innerText = "You ousted every single politician on stage!";
+    //       document.getElementById('end-headline').innerText = config.headlineWin;
+    //     } else {
+    //       document.getElementById('end-title').innerText = "❌ CAMPAIGN OVER!";
+    //       document.getElementById('end-sub').innerText = "You ran out of produce! The politicians survived.";
+    //       document.getElementById('end-headline').innerText = config.headlineLoss;
+    //     }
+    //     document.getElementById('end-tomatoes').innerText = ammo;
+    //   }, 500);
+    // }
+   function endGame(isWin) {
+  setTimeout(() => {
+    const config = countryConfigs[currentCountry];
+    showScreen('end-screen');
+    
+    const tagEl = document.getElementById('news-edition-tag');
+    const titleEl = document.getElementById('end-title');
+    const subEl = document.getElementById('end-headline');
+    
+    // Calculate Stats
+    const oustedCount = activePoliticians.filter(p => p.sunk).length;
+    const accuracy = totalShots > 0 ? Math.round((totalHits / totalShots) * 100) : 0;
+    const usedTomatoes = 35 - ammo;
+
+    // Calculate Star Rating
+    let starRating = "⭐";
+    if (isWin) {
+      if (usedTomatoes <= 22) starRating = "⭐⭐⭐";      // 3 Stars: Super efficient!
+      else if (usedTomatoes <= 30) starRating = "⭐⭐";  // 2 Stars: Good job!
+      else starRating = "⭐";                            // 1 Star: Barely made it!
+    } else {
+      starRating = "❌ DEFEAT";
     }
+
+    if (isWin) {
+      tagEl.innerText = "EXTRA! EXTRA!";
+      tagEl.style.background = "#2e7d32";
+      titleEl.innerText = "LANDSLIDE VICTORY!";
+      subEl.innerText = config.headlineWin;
+    } else {
+      tagEl.innerText = "ELECTION DISASTER!";
+      tagEl.style.background = "#b22222";
+      titleEl.innerText = "CAMPAIGN OVER!";
+      subEl.innerText = config.headlineLoss;
+    }
+    
+    // Fill Newspaper Stats
+    document.getElementById('end-ousted').innerText = `${oustedCount} / ${activePoliticians.length}`;
+    document.getElementById('end-accuracy').innerText = `${accuracy}%`;
+    document.getElementById('end-used').innerText = `${usedTomatoes} / 35`;
+    document.getElementById('end-stars').innerText = starRating;
+  }, 500);
+}
+
+
+    // ==========================================
+// DEV TESTING HELPERS (For testing End Screens)
+// ==========================================
+
+// Force a Victory Screen
+function testWin(remainingTomatoes = 15) {
+  ammo = remainingTomatoes;
+  standingCount = 0;
+  endGame(true);
+}
+
+// Force a Loss Screen
+function testLoss() {
+  ammo = 0;
+  standingCount = 2;
+  endGame(false);
+}
+
+// Secret Keyboard Shortcuts for Dev Testing:
+// Press 'W' on your keyboard for Win, 'L' for Loss
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'w' || e.key === 'W') {
+    console.log("Dev Test: Forcing Win Screen...");
+    testWin(12); // Test with 12 tomatoes left
+  }
+  if (e.key === 'l' || e.key === 'L') {
+    console.log("Dev Test: Forcing Loss Screen...");
+    testLoss();
+  }
+});
   </script>
 </body>
 </html>
